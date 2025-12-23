@@ -1,5 +1,5 @@
 import os
-from chunk import Chunk
+from classes.chunk import Chunk
 from uuid import uuid4
 
 from langchain_core.embeddings import Embeddings

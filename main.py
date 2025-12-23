@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
 
 from classes.agent import Jarvis
-from logger import log_info
+from classes.logger import log_info
 
 load_dotenv()
 

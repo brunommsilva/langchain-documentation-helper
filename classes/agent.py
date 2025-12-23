@@ -1,11 +1,12 @@
+from datetime import datetime
 import os
 from typing import List
 
 from langchain.tools import tool
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from classes.vector_store_gateway import VectorStoreGateway
 
-from vector_store_gateway import VectorStoreGateway
 
 @tool
 def search(query: str) -> str:
@@ -13,7 +14,9 @@ def search(query: str) -> str:
     index_name = os.environ["INDEX_NAME"]
     vector_store = VectorStoreGateway()
     chunks = vector_store.query(index_name, query, top_k=10)
-    return "\n\n".join(f"{chunk.content}\n - Source: {chunk.source}" for chunk in chunks)
+    return "\n\n".join(
+        f"{chunk.content}\n - Source: {chunk.source}" for chunk in chunks
+    )
 
 
 class Jarvis:
@@ -21,11 +24,12 @@ class Jarvis:
         self.tools = [search]
         self.tools_map = {tool.name: tool for tool in self.tools}
         self.llm = llm.bind_tools(self.tools)
-        self.prompt = """
+        self.prompt = f"""
 You are a helpful assistant. You name is Jarvis.
+We are in the year {datetime.now().year} DC.
 Your job is to answer human questions using only the results from the "{search}" tool that you MUST use.
 Trust its output UNCONDITIONALLY and DON'T use any other sources of information.
-To build trust, quote and provide the source of your information in your final answer.
+To build trust, quote and provide the source/url of your information in your final answer.
 """
 
     def __repr__(self) -> str:

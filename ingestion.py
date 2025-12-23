@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
 import asyncio
 import os
 import ssl
+import sys
 from typing import Any, Dict, List
 
 import certifi
@@ -13,8 +13,8 @@ from langchain_tavily import TavilyCrawl, TavilyExtract, TavilyMap
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from classes.chunk import Chunk
-from logger import log_header, log_info, log_success
 from classes.vector_store_gateway import VectorStoreGateway
+from classes.logger import log_header, log_info, log_success
 
 load_dotenv()
 
@@ -79,7 +79,7 @@ def extract_site_content(url: str) -> List[Document]:
     log_header(f"TavilyExtract: Starting extraction {url}")
 
     extraction_results = []
-    url_chunks = [urls[i:i + 20] for i in range(0, len(urls), 20)]
+    url_chunks = [urls[i : i + 20] for i in range(0, len(urls), 20)]
     for url_chunk in url_chunks:
         extraction_result: Dict[str, Any] = tavily_extract.invoke(
             {
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     url = sys.argv[1]
-    
+
     log_header("Starting Ingestion Process")
 
     log_header("Initializing Vector Store Index")
