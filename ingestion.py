@@ -4,7 +4,6 @@ import sys
 import asyncio
 import os
 import ssl
-from chunk import Chunk
 from typing import Any, Dict, List
 
 import certifi
@@ -13,8 +12,9 @@ from langchain_core.documents import Document
 from langchain_tavily import TavilyCrawl, TavilyExtract, TavilyMap
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from classes.chunk import Chunk
 from logger import log_header, log_info, log_success
-from vector_store_gateway import VectorStoreGateway
+from classes.vector_store_gateway import VectorStoreGateway
 
 load_dotenv()
 
