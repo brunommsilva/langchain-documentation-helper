@@ -1,11 +1,12 @@
 import os
-from classes.chunk import Chunk
 from uuid import uuid4
 
 from langchain_core.embeddings import Embeddings
 from langchain_ollama import OllamaEmbeddings
 from pinecone import QueryResponse, ServerlessSpec
 from pinecone.grpc import GRPCClientConfig, PineconeGRPC
+
+from classes.chunk import Chunk
 
 
 class VectorStoreGateway:

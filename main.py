@@ -3,7 +3,6 @@
 import sys
 
 from dotenv import load_dotenv
-from langchain_ollama import ChatOllama
 
 from classes.agent import Jarvis
 from classes.logger import log_info
@@ -17,7 +16,7 @@ if __name__ == "__main__":
 
     question = sys.argv[1]
 
-    agent = Jarvis(llm=ChatOllama(model="llama3.1:8b", temperature=0))
+    agent = Jarvis()
 
     response = agent.answer_question(question)
 

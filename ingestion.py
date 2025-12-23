@@ -13,8 +13,8 @@ from langchain_tavily import TavilyCrawl, TavilyExtract, TavilyMap
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from classes.chunk import Chunk
-from classes.vector_store_gateway import VectorStoreGateway
 from classes.logger import log_header, log_info, log_success
+from classes.vector_store_gateway import VectorStoreGateway
 
 load_dotenv()
 
