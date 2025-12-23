@@ -1,5 +1,5 @@
-import os
 from datetime import datetime
+import os
 from typing import List
 
 from langchain.tools import tool
@@ -7,6 +7,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (AIMessage, HumanMessage, SystemMessage,
                                      ToolMessage)
 from langchain_ollama import ChatOllama
+from langchain_tavily import TavilySearch
 
 from classes.vector_store_gateway import VectorStoreGateway
 
@@ -26,15 +27,18 @@ class Jarvis:
     def __init__(
         self, llm: BaseChatModel = ChatOllama(model="llama3.1:8b", temperature=0)
     ) -> str:
-        self.tools = [search]
+        self.tools = [search, TavilySearch()]
         self.tools_map = {tool.name: tool for tool in self.tools}
         self.llm = llm.bind_tools(self.tools)
         self.prompt = f"""
-You are a helpful assistant. You name is Jarvis.
-We are in the year {datetime.now().year} DC.
-Your job is to interact with a human.
-The human might ask a question, if so, only use the results from the "search" tool as your source of information.
-Trust its output UNCONDITIONALLY and DON'T use any other sources of information.
+You are a helpful assistant. You name is Jarvis. The current date is {datetime.now().strftime("%Y-%m-%d")}.
+Your job is to interact with a human. All your answers must follow the language used by the human.
+The human might ask a question or follow up, if so, only use the conversation history and the results of tool calls as your source of information.
+The tools you have access to are: {', '.join(tool.name for tool in self.tools)}.
+Ensure you refine the user's question using the conversation history before using any tool.
+Call the tools as needed to get more information.
+You MUST trust the tools' output UNCONDITIONALLY. Do NOT disclose your internal reasoning or the use of tools to the human.
+CRITICAL: Only provide a final answer when you are certain you have enough information to do so and don't plan to call any tools.
 To build trust with the human, quote and provide the source/url of your information in your final answer.
 """
         self.messages: List = [SystemMessage(content=self.prompt)]
@@ -66,8 +70,15 @@ To build trust with the human, quote and provide the source/url of your informat
                     tool_name = tool_call["name"]
                     tool_args = tool_call["args"]
 
-                    tool = self.tools_map[tool_name]
-                    tool_call_result = tool.invoke(tool_args)
+                    print(f"Invoking tool {tool_name}({tool_args})")
+
+                    try :
+                        tool = self.tools_map[tool_name]
+                        tool_call_result = tool.invoke(tool_args)
+                    except Exception as e:
+                        print(f"Error invoking tool {tool_name}: {str(e)}")
+                        tool_call_result = f"Error invoking tool {tool_name}: {str(e)}"
+                        
 
                     # Add tool result message
                     self.messages.append(
