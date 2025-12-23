@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import asyncio
 import os
 import ssl
@@ -71,20 +72,23 @@ def extract_site_content(url: str) -> List[Document]:
 
     site_map: Dict[str, Any] = tavily_map.invoke({"url": url})
 
-    urls = site_map.get("results", [])[:20]
+    urls = site_map.get("results", [])
     log_success(f"TavilyMap: Found {len(urls)} URLs in the sitemap")
-    log_info(f"URLs: {urls}")
+    log_info(f"Sample URLs: {urls[:5]}")
 
     log_header(f"TavilyExtract: Starting extraction {url}")
 
-    extraction_result: Dict[str, Any] = tavily_extract.invoke(
-        {
-            "urls": urls,
-            "extract_depth": "basic",
-        }
-    )
+    extraction_results = []
+    url_chunks = [urls[i:i + 20] for i in range(0, len(urls), 20)]
+    for url_chunk in url_chunks:
+        extraction_result: Dict[str, Any] = tavily_extract.invoke(
+            {
+                "urls": url_chunk,
+                "extract_depth": "advanced",
+            }
+        )
 
-    extraction_results = extraction_result.get("results", [])
+        extraction_results.extend(extraction_result.get("results", []))
 
     documents: List[Document] = [
         Document(page_content=result["raw_content"], metadata={"source": result["url"]})
@@ -97,8 +101,7 @@ def extract_site_content(url: str) -> List[Document]:
     return documents
 
 
-async def main():
-    source = "https://python.langchain.com"
+async def main(source: str):
     documents = extract_site_content(source)
 
     log_header(f"Chunking documents")
@@ -118,9 +121,15 @@ async def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Please provide an url as a command line argument.")
+        sys.exit(1)
+
+    url = sys.argv[1]
+    
     log_header("Starting Ingestion Process")
 
     log_header("Initializing Vector Store Index")
     vector_store.init_index(index_name)
 
-    asyncio.run(main())
+    asyncio.run(main(url))

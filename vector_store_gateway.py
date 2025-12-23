@@ -53,9 +53,6 @@ class VectorStoreGateway:
 
         return embeddings
 
-    def embed_query(self, query: str) -> list[float]:
-        return self.embeddings.embed_query(query)
-
     def store_vectors(
         self, index_name: str, chunks: list[Chunk], vectors: list[list[float]]
     ) -> None:
@@ -81,7 +78,7 @@ class VectorStoreGateway:
             )
 
     def query(self, index_name: str, query: str, top_k: int = 5) -> list[Chunk]:
-        embedded_query = self.embed_query(query)
+        embedded_query = self.embeddings.embed_query(query)
         index = self.__get_index(index_name)
         response: QueryResponse = index.query(
             vector=embedded_query,
@@ -91,7 +88,6 @@ class VectorStoreGateway:
         chunks = []
         for match in response["matches"]:
             metadata = match["metadata"]
-            # print(f"Score: {score}, Text: {metadata['text']}")
             chunk = Chunk(content=metadata["text"], source=metadata["source"])
             chunks.append(chunk)
 
